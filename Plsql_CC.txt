@@ -1,3 +1,11 @@
+create table PART (
+    PART_NO number not null,
+    PART_NAME varchar2(20) not null,
+    IN_STOCK number not null,
+    PART_PRICE number not null,
+    PART_DESC varchar2(50) not null
+);
+
 QUESTION NO.1:
 
 CREATE OR REPLACE PROCEDURE PDETAILS(
