@@ -1,69 +1,74 @@
-create table Part( 
-part_no number(6) NOTNULL,
-part_name varchar2(20) NOTNULL,
-in_stock Boolean,
-part_price number(6,2) NOTNULL,
-part_desc varchar2(50)
-);
-insert into part values(01,'ER',85,200,'abc');
-insert into part values(02,'TC',23,210,'xyz');
-insert into part values(03,'RS',99,220,'rst');
-insert into part values(04,'WS',81,230,'tyu');
-insert into part values(05,'RSD',90,240,'xcv');
+QUESTION NO.1:
 
-Question 1:
-create or replace procedure 
-is
-cursor N is select * from part where part_no=1;
-CUS N% rowtype;
-begin
-open N;
-loop
-fetch N into CUS;
-exit when N% notfound;
-DBMS_output.put_line(CUS.part_no|| '  ' || CUS.part_name|| '  '||
-CUS.in_stock|| '  '||CUS.part_price||' ' || CUS.part_desc);
-end loop;
-end;
+CREATE OR REPLACE PROCEDURE PDETAILS(
+P_PART_NO NUMBER,
+P_PART_NAME OUT VARCHAR2,
+P_IN_STOCK OUT NUMBER,
+P_PART_PRICE OUT NUMBER,
+P_PART_DESC OUT VARCHAR2)
+IS
+BEGIN
+SELECT PART_NAME,IN_STOCK,PART_PRICE,PART_DESC INTO P_PART_NAME,P_IN_STOCK,P_PART_PRICE,P_PART_DESC
+FROM PART
+WHERE PART_NO = P_PART_NO;
+END;
+
+DECLARE
+ PART_NAME VARCHAR2(20);
+ IN_STOCK NUMBER;
+ PART_PRICE NUMBER;
+ PART_DESC VARCHAR2(50);
+BEGIN
+PDETAILS(111,PART_NAME,IN_STOCK,PART_PRICE,PART_DESC);
+DBMS_OUTPUT.PUT_LINE('REMANING DETAIS ARE SELECTED PART NUMBER:' );
+DBMS_OUTPUT.PUT_LINE('NAME = ' ||PART_NAME||'   STOCKS = ' ||IN_STOCK||'   PRICE = '||PART_PRICE||'   DESCRIPTION = '|| PART_DESC);
+END;
 
 Question:2
-create table Back_up(
-part_no number(6),
-part_name varchar(20),
-modify_date date);
-
-
-create or replace trigger backup_trigger
-After insert or update or delete  on part
+create or replace trigger biu_part
+AFTER insert or delete or update on PART
 for each row
-declare 
-cursor N is select * from part;
+declare
+    tran_name varchar2(20);
 begin
-if updating then
-insert into Back_up values(:new.part_no,:new.part_price,sysdate);
-end if;
+    if inserting then
+    tran_name:='Insert';
+    elsif deleting then 
+    tran_name:='Delete';
+    else 
+    tran_name:='Update';
+    END IF;
+    if inserting then
+    insert into BACK_UP values (sysdate,user,tran_name, :new.PART_NO, :NEW.PART_NAME, :NEW.IN_STOCK, :NEW.PART_PRICE, :NEW.PART_DESC);
+    else 
+    insert into BACK_UP values (sysdate,user,tran_name, :OLD.PART_NO, :OLD.PART_NAME, :OLD.IN_STOCK, :OLD.PART_PRICE, :OLD.PART_DESC);
+    END IF;
 end;
+/
 
-Question 3:
-create or replace procedure 
- is
- cursor N is select * from part;
- DET N% rowtype;
- begin
- open N;
- loop
- fetch N into CUS;
- if CUS.in_stock<16 then
- update part set part_price=250;
- end if;
- end loop;
- end;
- 
- Question 4:
- set serverout on;
- begin
- for A in (select * from part)
- loop
- DBMS_output.put_line('value of Part_name:' || a.part_name);
- end loop;
- end;
+INSERT INTO PART VALUES(111,'HHH',15,150,'USED FOR HHH');
+INSERT INTO PART VALUES(222,'NNN',14,130,'USED FOR NNN');
+INSERT INTO PART VALUES(333,'AAA',25,300,'USED FOR AAA');
+INSERT INTO PART VALUES(444,'RRR',20,400,'USED FOR RRR');
+
+SELECT * FROM BACK_UP;
+
+QUESTION NO.3
+
+
+BEGIN
+UPDATE PART SET PART_PRICE=250 WHERE IN_STOCK < 16;
+END;
+SELECT * FROM PART;
+
+
+ QUESTION NO.4:
+
+
+ BEGIN
+ DBMS_OUTPUT.PUT_LINE('ALL THE DETAILS OF PART TABLE ARE:');
+ FOR a IN (SELECT * FROM PART)
+ LOOP
+ DBMS_OUTPUT.PUT_LINE('NUMBER =' || a.PART_NO || '    NAME = ' || a.PART_NAME || '   STOCK =' || a.IN_STOCK || '  PRICE = ' || a.PART_PRICE || '   DESCRIPTION = '||a.PART_DESC);
+ END LOOP;
+ END;
